@@ -1,0 +1,131 @@
+# Install fpdf if not already installed
+# pip install fpdf
+
+from fpdf import FPDF
+from datetime import datetime, timedelta
+
+# Define subjects, chapters, and color scheme
+subjects = {
+    "Social Science": 18,
+    "Mathematics": 14,
+    "Science": 13,
+    "English": 13,
+    "Artificial Intelligence": 5
+}
+
+subject_colors = {
+    "Social Science": (255, 204, 153),  # Light Orange
+    "Mathematics": (153, 204, 255),     
+    "Science": (204, 255, 153),         
+    "English": (255, 153, 204),         
+    "Artificial Intelligence": (255, 255, 153) 
+}
+
+subject_icons = {
+    "Social Science": "🌍",
+    "Mathematics": "📐",
+    "Science": "🧪",
+    "English": "📘",
+    "Artificial Intelligence": "💻"
+}
+
+# Motivational quotes (mixed)
+quotes = [
+    "Discipline is the bridge between goals and accomplishment.",
+    "Small steps every day lead to big results.",
+    "Stay calm and trust your preparation.",
+    "Consistency is key to success.",
+    "Balance your effort with self-care.",
+    "Believe in yourself and all that you are."
+]
+
+# Exam dates
+exam_dates = {
+    "Social Science": "01 Dec 2025",
+    "Mathematics": "04 Dec 2025",
+    "Science": "08 Dec 2025",
+    "English": "14 Dec 2025",
+    "Artificial Intelligence": "16 Dec 2025"
+}
+
+# Create PDF
+pdf = FPDF(orientation='L', unit='mm', format='A4')
+pdf.set_auto_page_break(auto=True, margin=10)
+
+# Cover Page
+pdf.add_page()
+pdf.set_font("Arial", 'B', 36)
+pdf.set_text_color(102, 51, 153)  # Purple
+pdf.cell(0, 80, "Falaq's Exam Study Planner 2025", 0, 1, 'C')
+pdf.set_font("Arial", '', 24)
+pdf.set_text_color(0, 0, 0)
+pdf.cell(0, 20, "7 Nov – 16 Dec 2025", 0, 1, 'C')
+pdf.ln(20)
+pdf.set_font("Arial", 'I', 18)
+pdf.multi_cell(0, 10, "Plan your study effectively, stay motivated, and balance work with rest. 💪🌸", 0, 'C')
+
+# Generate timetable for each day
+start_date = datetime(2025, 11, 7)
+end_date = datetime(2025, 12, 16)
+delta = timedelta(days=1)
+current_date = start_date
+quote_index = 0
+
+while current_date <= end_date:
+    pdf.add_page()
+    # Header
+    pdf.set_font("Arial", 'B', 28)
+    pdf.set_text_color(0, 51, 102)  # Dark blue
+    pdf.cell(0, 15, current_date.strftime("%A, %d %b %Y"), 0, 1, 'C')
+    pdf.ln(5)
+    
+    # Motivational quote
+    pdf.set_font("Arial", 'I', 18)
+    pdf.set_text_color(102, 51, 153)
+    pdf.multi_cell(0, 10, f"💡 {quotes[quote_index % len(quotes)]}", 0, 'C')
+    quote_index += 1
+    pdf.ln(5)
+    
+    # Study blocks
+    pdf.set_font("Arial", '', 16)
+    time_blocks = [("4:00 PM – 5:30 PM", "Session 1"), ("5:45 PM – 7:15 PM", "Session 2"), ("7:30 PM – 9:00 PM", "Session 3"), ("9:15 PM – 10:00 PM", "Quick Revision")]
+    
+    y_start = pdf.get_y()
+    x_start = 10
+    block_height = 25
+    block_width = (297 - 20) / 4  # Landscape width 297mm - margins
+    
+    for i, (time_range, session_name) in enumerate(time_blocks):
+        pdf.set_fill_color(200, 200, 200)
+        pdf.rect(x_start + i*block_width, y_start, block_width-2, block_height, style='FD')
+        pdf.set_xy(x_start + i*block_width, y_start + 5)
+        pdf.set_font("Arial", 'B', 14)
+        pdf.set_text_color(0, 0, 0)
+        pdf.multi_cell(block_width-2, 6, f"{time_range}\n{session_name}", 0, 'C')
+    
+    # Suggested subjects for the day (rotating)
+    subject_list = list(subjects.keys())
+    day_index = (current_date - start_date).days
+    first_subject = subject_list[day_index % len(subject_list)]
+    second_subject = subject_list[(day_index + 1) % len(subject_list)]
+    
+    pdf.ln(block_height + 10)
+    pdf.set_font("Arial", 'B', 18)
+    pdf.set_text_color(*subject_colors[first_subject])
+    pdf.cell(0, 10, f"{subject_icons[first_subject]} {first_subject}", 0, 1, 'C')
+    
+    pdf.set_font("Arial", 'B', 18)
+    pdf.set_text_color(*subject_colors[second_subject])
+    pdf.cell(0, 10, f"{subject_icons[second_subject]} {second_subject}", 0, 1, 'C')
+    
+    # Notes
+    pdf.set_text_color(0,0,0)
+    pdf.set_font("Arial", 'I', 14)
+    pdf.ln(10)
+    pdf.multi_cell(0, 8, "Notes: ________________________________________________________________", 0, 'L')
+    
+    current_date += delta
+
+# Save PDF
+pdf.output("Falaq_Exam_Study_Planner_2025.pdf")
+print("PDF generated successfully!")
